@@ -23,4 +23,23 @@ RSpec.describe "Projects", type: :system do
       end
     }.to change(user.projects, :count).by(1)
   end
+
+  scenario "user completes a project" do
+    # プロジェクトを持ったユーザーを準備する
+    user = FactoryBot.create(:user)
+    project = FactoryBot.create(:project, owner: user)
+    # ユーザーはログインしている
+    sign_in user
+    # ユーザーがプロジェクト画面を開き、
+    visit project_path(project)
+    expect(page).to_not have_content "Completed"
+    # "complete" ボタンをクリックすると、
+    click_button "Complete"
+    # save_and_open_page
+    # プロジェクトは完了済みとしてマークされる
+    expect(project.reload.completed?).to be true
+    expect(page).to have_content "Congratulations, this project is complete!"
+    expect(page).to have_content "Completed"
+    expect(page).to_not have_button "Complete"
+  end
 end
